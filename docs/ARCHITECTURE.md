@@ -66,10 +66,16 @@ Produce institutional-quality underwriting artifacts from noisy web3 project dat
   - decision gates
   - normalized dimension rows
 
+11. `api.py`
+- Exposes HTTP surface for external clients.
+- Enforces API-key authentication.
+- Provides `health` and `analyze` endpoints.
+- Returns stable envelope with request metadata + full result payload.
+
 ## Data model
 
-All output contracts are strongly shaped by dataclasses in `models.py` and serialized via `AgentResult.to_dict()`.
-This enforces consistency between API-like output and dashboard ingestion.
+All output contracts are shaped by dataclasses in `models.py` and serialized via `AgentResult.to_dict()`.
+This enforces consistency between CLI, API, and dashboard ingestion.
 
 ## AI refinement boundary
 
@@ -78,18 +84,18 @@ The deterministic engine remains the source of truth for pipeline completion.
 
 ## Failure behavior
 
-- Source unavailable / blocked: deterministic ingestion errors with clear CLI exit message.
+- Source unavailable/blocked: deterministic ingestion errors with clear failure semantics.
 - Market provider outages: partial market snapshot with notes; no hard-fail.
 - AI unavailable in `auto`: fallback to deterministic outputs.
 - AI unavailable in `ai`: explicit failure.
+- API auth failure: explicit `401` with no pipeline execution.
 
 ## Extensibility points
 
 - Add new diligence dimensions in `research.py` + `risk_engine.py` + `narrative.py`.
 - Add providers in `market_data.py` and `fundraising.py`.
-- Add downstream output adapters (REST, Kafka, warehouse) from `AgentResult.to_dict()`.
-
+- Add downstream adapters (REST, Kafka, warehouse) from `AgentResult.to_dict()`.
 
 ## Planned protocol integration
-- See docs/PROTOCOL_INTEGRATIONS.md for x402 on MegaETH rollout design and boundaries.
 
+See `docs/PROTOCOL_INTEGRATIONS.md` for x402 on MegaETH rollout design and boundaries.

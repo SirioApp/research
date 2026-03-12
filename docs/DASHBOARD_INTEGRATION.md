@@ -2,67 +2,75 @@
 
 ## Objective
 
-Map `AgentResult` output to operational dashboards for IC workflows, risk monitoring, and pipeline triage.
+Map Backed Research Agent output to operational dashboards for IC workflows, risk monitoring, and pipeline triage.
 
-## Execution pattern
+## Integration options
 
-1. Run CLI with JSON output.
-2. Persist payload to storage (blob/db/warehouse).
-3. Materialize dashboard views from stable schema paths.
+1. CLI batch flow
+- Run CLI on schedule or event trigger.
+- Save JSON payload to storage.
+- Feed dashboard ETL from stored payloads.
 
-Example:
-```bash
-backed-research-agent --source "https://project-site.com" --json --output "./out/report.json"
-```
+2. API flow
+- Call `POST /v1/analyze` from backend.
+- Persist response envelope and `result` payload.
+- Serve dashboard from normalized views and raw JSON snapshots.
 
 ## Suggested dashboard layout
 
 ### Row 1: Decision overview
-- Investment score (`score.value`)
-- Confidence (`score.confidence`)
-- Recommendation (`recommendation`)
-- Market regime (`market_snapshot.regime`)
+
+- Investment score (`result.score.value`)
+- Confidence (`result.score.confidence`)
+- Recommendation (`result.recommendation`)
+- Market regime (`result.market_snapshot.regime`)
 
 ### Row 2: Risk surfaces
-- Max risk severity (`dashboard.kpis.max_risk_severity`)
-- Avg risk severity (`dashboard.kpis.avg_risk_severity`)
-- Risk register heatmap (`risk_register[]`)
 
-### Row 3: Team + fundraising
-- Team overall score (`team_assessment.overall_score`)
-- Sub-score radar (`team_assessment.*_score`)
-- Raising difficulty (`fundraising_context.raising_difficulty_score`)
-- Raise vs benchmark ratio (`fundraising_context.raise_to_benchmark_ratio`)
+- Max risk severity (`result.dashboard.kpis.max_risk_severity`)
+- Avg risk severity (`result.dashboard.kpis.avg_risk_severity`)
+- Risk register heatmap (`result.risk_register[]`)
+
+### Row 3: Team and fundraising
+
+- Team score (`result.team_assessment.overall_score`)
+- Team sub-score radar (`result.team_assessment.*_score`)
+- Raising difficulty (`result.fundraising_context.raising_difficulty_score`)
+- Raise benchmark ratio (`result.fundraising_context.raise_to_benchmark_ratio`)
 
 ### Row 4: Dimension diagnostics
-- Table source: `dashboard.dimension_rows[]`
-- Columns: score, confidence, risk severity, hit counts, analysis
+
+- Table source: `result.dashboard.dimension_rows[]`
+- Key columns: score, confidence, risk severity, hit balance, analysis, key questions
 
 ### Row 5: Actionability
-- Alerts (`dashboard.top_alerts[]`)
-- Decision gates (`dashboard.decision_gates[]`)
-- Next checks (`project_assessment.next_checks[]`)
+
+- Alerts (`result.dashboard.top_alerts[]`)
+- Decision gates (`result.dashboard.decision_gates[]`)
+- Next checks (`result.project_assessment.next_checks[]`)
 
 ## Data model recommendations
 
-For BI/warehouse ingestion:
-- Store full raw JSON for traceability.
-- Extract normalized tables:
-  - `runs`
-  - `risk_items`
+For warehouse/BI architecture:
+
+- Keep full raw JSON for auditability and replay.
+- Build normalized tables:
+  - `analysis_runs`
   - `dimension_findings`
+  - `risk_items`
   - `team_metrics`
   - `market_snapshots`
   - `fundraising_snapshots`
 
 ## Refresh policy
 
-- Market context: every 4-12h.
-- Full underwriting rerun: when new project documents appear or after major market dislocations.
-- IC-ready snapshot: freeze payload with timestamp before committee review.
+- Market context refresh: every 4-12h.
+- Full underwriting rerun: on new project docs/events or major market dislocations.
+- IC freeze snapshot: persist immutable run artifact before committee decisions.
 
 ## Quality controls
 
-- Enforce schema checks against `docs/OUTPUT_SCHEMA.md`.
-- Reject payloads missing `risk_register`, `team_assessment`, or `dashboard` sections.
-- Log provider notes for partial market/fundraising fetch failures.
+- Validate against `docs/OUTPUT_SCHEMA.md`.
+- Reject payloads missing `risk_register`, `team_assessment`, or `dashboard` blocks.
+- Track partial provider failures via notes fields (`market_snapshot.notes`, `fundraising_context.notes`).
+- Log API status code, request_id, and source fingerprint for troubleshooting.

@@ -1,51 +1,42 @@
 # Backed Research Agent
 
 Backed Research Agent is an analyst-grade web3 diligence engine for venture-style underwriting.
-It converts heterogeneous project sources (websites + documents) into a structured decision payload for investment committees, risk teams, and dashboard systems.
+It transforms heterogeneous source material (websites and documents) into a structured investment output for IC workflows, risk teams, and dashboard systems.
 
 ## Scope
 
-The engine is designed for early-stage to growth-stage web3 opportunities where signal quality is noisy and downside risk dominates the decision surface.
+The engine is designed for early-stage to growth-stage crypto/web3 opportunities where information quality is inconsistent and downside protection is critical.
 
-## What the system does
+## Core capabilities
 
-1. Ingests source material
-- URL fetching with anti-rate-limit resilience (retry/backoff/fallback).
-- Local document ingestion (`txt`, `md`, `csv`, `json`, `pdf`, `docx`).
+1. Ingestion
+- URL fetching with retry/backoff and fallback strategy for `429/5xx` surfaces.
+- Local file ingestion (`txt`, `md`, `csv`, `json`, `pdf`, `docx`).
 
-2. Runs deterministic underwriting
-- 9-dimension scoring model with confidence and explicit weights.
-- Evidence-term accounting per dimension (positive/negative clusters).
+2. Deterministic underwriting
+- Multi-dimension scoring with explicit weights and confidence.
+- Positive/negative evidence accounting for each analytical dimension.
 
-3. Builds multi-factor risk register
-- `probability`, `impact`, `severity` decomposition.
-- Risk metadata (`category`, `owner`, `timeframe`, `mitigation`).
+3. Risk and team evaluation
+- Structured risk register (`probability`, `impact`, `severity`, mitigation metadata).
+- Team underwriting across founder visibility, execution history, domain fit, hiring signal, governance trust.
 
-4. Computes dedicated team underwriting
-- Founder visibility.
-- Execution track record.
-- Domain expertise.
-- Hiring signal.
-- Governance trust.
+4. Market and fundraising context
+- Live market signals (BTC/ETH, dominance, TVL, sentiment, regime).
+- Raise signal extraction and benchmark comparison with raising difficulty score.
 
-5. Adds live market/fundraising context
-- CoinGecko, DefiLlama, Fear & Greed sources.
-- Detected raise context + benchmark ratio + raising difficulty.
+5. Decision output and dashboard payload
+- Executive summary and recommendation.
+- Project assessment and investment memo.
+- Dashboard-native section with KPIs, alerts, gates, and dimension rows.
 
-6. Produces decision artifacts
-- Executive summary.
-- Recommendation.
-- Project assessment (strengths, red flags, catalysts, checks).
-- Investment memo (summary, bull case, bear case, decision statement).
-- Dashboard-first payload (`kpis`, alerts, gates, rows).
+## Runtime modes
 
-## Deterministic core + optional AI refinement
+- `rules`: deterministic engine only.
+- `auto`: deterministic engine plus AI refinement when `OPENAI_API_KEY` is available.
+- `ai`: AI refinement required.
 
-- `--mode rules`: deterministic only.
-- `--mode auto`: deterministic + AI refinement when `OPENAI_API_KEY` is present.
-- `--mode ai`: force AI refinement.
-
-AI does not replace the deterministic base; it refines narrative quality and can adjust analytical fields within schema constraints.
+AI refinement improves narrative and advanced analytical fields but does not replace deterministic pipeline structure.
 
 ## Installation
 
@@ -55,7 +46,7 @@ pip install -e .
 
 ## Configuration
 
-Create `.env` from template:
+Create `.env` from template.
 
 Unix/macOS:
 ```bash
@@ -67,12 +58,15 @@ Windows PowerShell:
 Copy-Item .env.example .env
 ```
 
-Optional:
-```bash
-OPENAI_API_KEY=your_key
-```
+Supported variables:
 
-## Usage
+- `OPENAI_API_KEY` (optional)
+- `BACKED_API_KEY` (default: `GIT3PRIVATE`)
+- `BACKED_API_HOST` (default: `127.0.0.1`)
+- `BACKED_API_PORT` (default: `8000`)
+- `BACKED_API_CORS_ORIGINS` (default: `*`)
+
+## CLI usage
 
 Primary command:
 ```bash
@@ -89,19 +83,47 @@ Module entrypoint:
 python -m investment_agent.cli --source "https://project-site.com" --json --output "./out/report.json"
 ```
 
-## CLI options
+CLI options:
 
-```text
---source   Repeatable URL or local file input
---mode     auto | ai | rules
---model    LLM model for ai mode (default: gpt-4.1-mini)
---json     Print full JSON payload
---output   Save JSON payload to file
+- `--source` repeatable URL or local file input
+- `--mode` `auto | ai | rules`
+- `--model` LLM model for AI mode (default `gpt-4.1-mini`)
+- `--json` print full JSON output
+- `--output` write full JSON output to file
+
+## API usage
+
+Start API service:
+```bash
+backed-research-agent-api
 ```
+
+Available endpoints:
+
+- `GET /v1/health`
+- `POST /v1/analyze` (API key required)
+
+API authentication:
+
+- `X-API-Key: <key>`
+- or `Authorization: Bearer <key>`
+
+Request payload supports:
+
+- `source` (single source)
+- `sources` (multiple sources)
+- `mode`
+- `model`
+
+Response includes:
+
+- request metadata (`request_id`, `sources`, `mode`, `model`)
+- full underwriting result under `result`
 
 ## Output contract
 
-Top-level sections:
+Top-level analysis payload sections:
+
 - `score`
 - `executive_summary`
 - `recommendation`
@@ -114,10 +136,12 @@ Top-level sections:
 - `findings`
 - `sources`
 
-Full schema: [docs/OUTPUT_SCHEMA.md](./docs/OUTPUT_SCHEMA.md)
+Schema reference: [docs/OUTPUT_SCHEMA.md](./docs/OUTPUT_SCHEMA.md)
 
-## Technical docs
+## Technical documentation
 
+- [Integration.md](./Integration.md)
+- [docs/API.md](./docs/API.md)
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
 - [docs/VC_FRAMEWORK.md](./docs/VC_FRAMEWORK.md)
 - [docs/DASHBOARD_INTEGRATION.md](./docs/DASHBOARD_INTEGRATION.md)
@@ -127,8 +151,8 @@ Full schema: [docs/OUTPUT_SCHEMA.md](./docs/OUTPUT_SCHEMA.md)
 
 ## Near-term integration roadmap
 
-Planned integration includes **x402 on MegaETH** as a protocol-level payment/authentication primitive for premium research execution paths.
-This integration is currently **planned** and not yet enabled in the current release.
+Planned protocol roadmap includes **x402 on MegaETH** as a payment/authentication primitive for premium research execution paths.
+This integration is planned and not active in the current release.
 
 ## Development
 

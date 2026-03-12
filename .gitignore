@@ -1,4 +1,6 @@
 .env
+.env.*
+!.env.example
 .venv/
 __pycache__/
 *.pyc
@@ -10,5 +12,3 @@ out/
 *.egg-info/
 .DS_Store
 Thumbs.db
-.env.example
-
