@@ -18,4 +18,4 @@ Project maintainers may remove content, issue warnings, or restrict participatio
 
 ## Reporting
 Please report conduct issues to:
-- conduct@backedresearch.io
+- hi@backed.app

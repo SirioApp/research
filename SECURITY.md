@@ -4,7 +4,7 @@
 If you discover a security issue, do not open a public issue.
 
 Please report privately to:
-- security@backedresearch.io
+- hi@backed.app
 
 Include:
 - impacted component/file
