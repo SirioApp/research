@@ -1,0 +1,41 @@
+[project]
+name = "backed-research-agent"
+version = "0.2.0"
+description = "Backed Research Agent: analyst-grade web3 due diligence engine with risk register, team underwriting, and dashboard-ready output."
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["web3", "venture-capital", "due-diligence", "risk", "research", "dashboard"]
+license = { text = "MIT" }
+authors = [
+  { name = "Backed Research" }
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Financial and Insurance Industry",
+  "Topic :: Office/Business :: Financial :: Investment"
+]
+dependencies = [
+  "requests>=2.32.0",
+  "beautifulsoup4>=4.12.0",
+  "pypdf>=5.0.0",
+  "python-docx>=1.1.2",
+  "python-dotenv>=1.0.1"
+]
+
+[project.scripts]
+backed-research-agent = "investment_agent.cli:main"
+investment-agent = "investment_agent.cli:main"
+
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
