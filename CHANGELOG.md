@@ -9,6 +9,7 @@
 - Added authenticated HTTP API (`/v1/health`, `/v1/analyze`) with API-key support.
 - Added integration documentation for API-to-dashboard pipelines.
 - Added API helper tests and improved release checklist for public repository readiness.
+- Added deterministic project identity/general metadata extraction (project_profile).
 - Added public-repo documentation set and CI workflow.
 
 ## 0.1.0

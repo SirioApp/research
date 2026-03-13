@@ -50,7 +50,7 @@ Response body:
 - `model` (`string`)
 - `result` (`object`) full structured analysis payload
 
-The `result` object shape is defined in [docs/OUTPUT_SCHEMA.md](./OUTPUT_SCHEMA.md).
+The `result` object includes project identity/general metadata under `project_profile` and full underwriting sections defined in [docs/OUTPUT_SCHEMA.md](./OUTPUT_SCHEMA.md).
 
 ## Status codes
 

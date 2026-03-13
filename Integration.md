@@ -49,7 +49,7 @@ Response envelope:
 - `sources`: normalized input list processed by the run
 - `mode`: run mode used by the engine
 - `model`: model name used by the run
-- `result`: full analysis payload (`score`, `risk_register`, `team_assessment`, `market_snapshot`, `dashboard`, etc.)
+- `result`: full analysis payload (`project_profile`, `score`, `risk_register`, `team_assessment`, `market_snapshot`, `dashboard`, etc.)
 
 ## Error semantics
 

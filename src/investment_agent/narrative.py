@@ -44,11 +44,14 @@ class NarrativeEngine:
         team: TeamAssessment,
         market: MarketSnapshot,
         funding: FundraisingContext,
+        project_name: str | None = None,
     ) -> str:
         weakest = sorted(findings, key=lambda x: x.score)[:3]
         weak_text = ", ".join(self._label(x.dimension) for x in weakest)
+        project_prefix = f"{project_name}: " if project_name else ""
+
         return (
-            f"Underwritten score is {score.value:.3f} with confidence {score.confidence:.3f}. "
+            f"{project_prefix}Underwritten score is {score.value:.3f} with confidence {score.confidence:.3f}. "
             f"Team score is {team.overall_score:.3f}. Current market regime is {market.regime}. "
             f"Fundraising difficulty score is {funding.raising_difficulty_score:.3f}. "
             f"Main diligence pressure points are {weak_text}."
@@ -164,10 +167,13 @@ class NarrativeEngine:
                 "Is there legal structuring for token issuance and governance?",
             ],
         }
-        return mapping.get(finding.dimension, [
-            "What primary data would materially improve confidence in this dimension?",
-            "What falsifies the current underwriting assumption?",
-        ])
+        return mapping.get(
+            finding.dimension,
+            [
+                "What primary data would materially improve confidence in this dimension?",
+                "What falsifies the current underwriting assumption?",
+            ],
+        )
 
     def _label(self, dimension: str) -> str:
         return self._labels.get(dimension, dimension)

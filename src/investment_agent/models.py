@@ -107,6 +107,21 @@ class FundraisingContext:
 
 
 @dataclass(slots=True)
+class ProjectProfile:
+    name: str | None
+    description: str | None
+    website: str | None
+    category: str | None
+    sector_tags: list[str]
+    stage: str | None
+    token_symbol: str | None
+    chain_focus: list[str]
+    social_links: dict[str, str]
+    key_claims: list[str]
+    data_quality: dict[str, Any]
+
+
+@dataclass(slots=True)
 class ProjectAssessment:
     strengths: list[str]
     risks: list[str]
@@ -139,6 +154,7 @@ class AgentResult:
     sources: list[str]
     executive_summary: str
     recommendation: str
+    project_profile: ProjectProfile
     project_assessment: ProjectAssessment
     risk_register: list[RiskItem]
     investment_memo: InvestmentMemo
@@ -166,6 +182,19 @@ class AgentResult:
             },
             "executive_summary": self.executive_summary,
             "recommendation": self.recommendation,
+            "project_profile": {
+                "name": self.project_profile.name,
+                "description": self.project_profile.description,
+                "website": self.project_profile.website,
+                "category": self.project_profile.category,
+                "sector_tags": self.project_profile.sector_tags,
+                "stage": self.project_profile.stage,
+                "token_symbol": self.project_profile.token_symbol,
+                "chain_focus": self.project_profile.chain_focus,
+                "social_links": self.project_profile.social_links,
+                "key_claims": self.project_profile.key_claims,
+                "data_quality": self.project_profile.data_quality,
+            },
             "project_assessment": {
                 "strengths": self.project_assessment.strengths,
                 "risks": self.project_assessment.risks,

@@ -9,6 +9,7 @@ from .ingestion import SourceIngestor
 from .market_data import MarketDataProvider
 from .models import AgentResult, FundraisingContext, InvestmentScore, MarketSnapshot, RiskItem, TeamAssessment
 from .narrative import NarrativeEngine
+from .project_profile import ProjectProfileBuilder
 from .research import ResearchEngine
 from .risk_engine import RiskEngine
 from .scoring import InvestmentScorer
@@ -35,10 +36,12 @@ class InvestmentResearchAgent:
         self._fundraising_provider = FundraisingContextProvider()
         self._narrative_engine = NarrativeEngine()
         self._dashboard_builder = DashboardBuilder()
+        self._project_profile_builder = ProjectProfileBuilder()
 
     def run(self, sources: list[str]) -> AgentResult:
         documents = self._ingestor.ingest(sources)
         findings = self._research_engine.analyze(documents)
+        project_profile = self._project_profile_builder.build(documents)
 
         for finding in findings:
             finding.analysis = self._narrative_engine.build_dimension_analysis(finding)
@@ -59,6 +62,7 @@ class InvestmentResearchAgent:
             team_assessment,
             market_snapshot,
             fundraising_context,
+            project_name=project_profile.name,
         )
         project_assessment = self._narrative_engine.build_project_assessment(findings, risk_register, team_assessment)
         investment_memo = self._narrative_engine.build_investment_memo(
@@ -100,6 +104,7 @@ class InvestmentResearchAgent:
             sources=[item.source for item in documents],
             executive_summary=executive_summary,
             recommendation=recommendation,
+            project_profile=project_profile,
             project_assessment=project_assessment,
             risk_register=risk_register,
             investment_memo=investment_memo,

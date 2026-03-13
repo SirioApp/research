@@ -20,6 +20,7 @@ Map Backed Research Agent output to operational dashboards for IC workflows, ris
 
 ### Row 1: Decision overview
 
+- Project header from `result.project_profile` (name, description, category, stage, website).
 - Investment score (`result.score.value`)
 - Confidence (`result.score.confidence`)
 - Recommendation (`result.recommendation`)

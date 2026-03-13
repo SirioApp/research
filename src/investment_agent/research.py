@@ -72,27 +72,54 @@ class ResearchEngine:
         ),
     )
 
+    _RISK_SENSITIVE_DIMENSIONS = {"regulatory_compliance", "technology_security", "team_execution"}
+
     def analyze(self, documents: list[SourceDocument]) -> list[ResearchFinding]:
         corpus = " ".join(doc.text.lower() for doc in documents)
-        findings: list[ResearchFinding] = []
+        sentence_corpus = self._split_sentences(corpus)
+        source_count = len(documents)
 
+        findings: list[ResearchFinding] = []
         for profile in self._profiles:
-            positive_map = self._count_terms(corpus, profile.positive_terms)
-            negative_map = self._count_terms(corpus, profile.negative_terms)
+            positive_map = self._count_terms_by_sentence(sentence_corpus, profile.positive_terms)
+            negative_map = self._count_terms_by_sentence(sentence_corpus, profile.negative_terms)
+
             positive_hits = sum(positive_map.values())
             negative_hits = sum(negative_map.values())
             evidence_total = positive_hits + negative_hits
+            unique_terms = len(positive_map) + len(negative_map)
 
             if evidence_total == 0:
-                score = 0.5
-                confidence = 0.12
-                rationale = f"No explicit {profile.name} evidence found; neutral baseline applied."
-            else:
-                raw = (positive_hits - negative_hits) / evidence_total
-                score = (raw + 1.0) / 2.0
-                confidence = min(1.0, evidence_total / 16.0)
+                score = 0.40 if profile.name in self._RISK_SENSITIVE_DIMENSIONS else 0.45
+                confidence = 0.08
                 rationale = (
-                    f"Derived from {positive_hits} positive and {negative_hits} negative {profile.name} signals."
+                    f"Insufficient explicit {profile.name} evidence; conservative baseline applied for production-grade underwriting."
+                )
+            else:
+                polarity = (positive_hits - negative_hits) / evidence_total
+                support_strength = min(1.0, evidence_total / 18.0)
+                term_diversity = min(1.0, unique_terms / 8.0)
+                source_diversity = min(1.0, source_count / 3.0)
+
+                # Shrink extreme polarity when support is shallow.
+                effective_support = 0.55 * support_strength + 0.30 * term_diversity + 0.15 * source_diversity
+                shrunken_polarity = polarity * effective_support
+                score = 0.5 + 0.5 * shrunken_polarity
+
+                if negative_hits > 0 and positive_hits > 0:
+                    score -= 0.04
+                if profile.name in self._RISK_SENSITIVE_DIMENSIONS and evidence_total < 8:
+                    score -= 0.05
+
+                if negative_hits == 0 and positive_hits > 0 and effective_support < 0.70:
+                    score = min(score, 0.78)
+
+                confidence = 0.10 + 0.55 * support_strength + 0.25 * term_diversity + 0.10 * source_diversity
+                confidence = min(0.92, confidence)
+
+                rationale = (
+                    f"Derived from {positive_hits} positive and {negative_hits} negative {profile.name} signals, "
+                    f"with support={effective_support:.2f} and term_diversity={term_diversity:.2f}."
                 )
 
             evidence_items = self._build_evidence_items(positive_map, negative_map)
@@ -112,10 +139,18 @@ class ResearchEngine:
         return findings
 
     @staticmethod
-    def _count_terms(corpus: str, terms: tuple[str, ...]) -> dict[str, int]:
+    def _split_sentences(text: str) -> list[str]:
+        return [part.strip() for part in re.split(r"(?<=[.!?])\s+", text) if part.strip()]
+
+    @staticmethod
+    def _count_terms_by_sentence(sentences: list[str], terms: tuple[str, ...]) -> dict[str, int]:
         output: dict[str, int] = {}
         for term in terms:
-            count = len(re.findall(rf"\b{re.escape(term.lower())}\b", corpus))
+            pattern = re.compile(rf"\b{re.escape(term.lower())}\b")
+            count = 0
+            for sentence in sentences:
+                if pattern.search(sentence):
+                    count += 1
             if count > 0:
                 output[term] = count
         return output

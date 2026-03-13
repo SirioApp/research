@@ -10,9 +10,11 @@ class AgentTests(unittest.TestCase):
     def test_agent_returns_dashboard_ready_payload(self) -> None:
         sample_path = Path("tests/sample_report.txt")
         sample_path.write_text(
+            "Project: HuruPay. HuruPay is a cross-border payment protocol built on Ethereum. "
             "Founders previously built two crypto products and published a security audit. "
             "Mainnet launched with growing active users, but unlock pressure is expected in 12 months. "
-            "Treasury runway is uncertain and regulatory exposure remains under review.",
+            "Treasury runway is uncertain and regulatory exposure remains under review. "
+            "Website: https://hurupay.example",
             encoding="utf-8",
         )
 
@@ -22,12 +24,17 @@ class AgentTests(unittest.TestCase):
 
         self.assertGreaterEqual(result.score.value, 0.0)
         self.assertLessEqual(result.score.value, 1.0)
+        self.assertIn("project_profile", payload)
         self.assertIn("team_assessment", payload)
         self.assertIn("market_snapshot", payload)
         self.assertIn("fundraising_context", payload)
         self.assertIn("risk_register", payload)
         self.assertIn("dashboard", payload)
         self.assertGreaterEqual(len(payload["dashboard"]["dimension_rows"]), 5)
+
+        profile = payload["project_profile"]
+        self.assertTrue(profile["name"])
+        self.assertTrue(profile["description"])
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-# Research Basis
+﻿# Research Basis
 
 The framework follows recurring diligence priorities from leading VC/web3 research and is adapted into a deterministic scoring + risk architecture.
 
@@ -33,3 +33,10 @@ The framework follows recurring diligence priorities from leading VC/web3 resear
 - Alternative.me Fear & Greed index
 
 These references and feeds shape methodology; final decisions still require primary diligence and specialist review.
+
+## Scoring robustness controls
+- Sentence-level evidence counting (not raw token frequency) to reduce keyword stuffing bias.
+- Support-based shrinkage toward neutral when evidence depth is low.
+- Conservative baselines on risk-sensitive dimensions (`regulatory_compliance`, `technology_security`, `team_execution`) when explicit evidence is missing.
+- Confidence bounded by support strength, term diversity, and source diversity.
+

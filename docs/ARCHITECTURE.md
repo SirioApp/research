@@ -1,4 +1,4 @@
-# Architecture
+﻿# Architecture
 
 ## System objective
 
@@ -13,7 +13,7 @@ Produce institutional-quality underwriting artifacts from noisy web3 project dat
 
 2. `research.py`
 - Applies weighted dimension profiles.
-- Counts positive/negative term clusters per dimension.
+- Counts positive/negative term clusters per dimension using sentence-level normalization (anti-keyword-stuffing).
 - Computes per-dimension:
   - `score` in `[0,1]`
   - `confidence` in `[0,1]`
@@ -99,3 +99,4 @@ The deterministic engine remains the source of truth for pipeline completion.
 ## Planned protocol integration
 
 See `docs/PROTOCOL_INTEGRATIONS.md` for x402 on MegaETH rollout design and boundaries.
+

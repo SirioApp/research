@@ -19,14 +19,30 @@ The agent returns a single JSON object with these top-level sections.
 ## 3) recommendation
 - Decision label: e.g. `Invest`, `Conditional invest after targeted diligence`, `Do not invest yet`.
 
-## 4) project_assessment
+## 4) project_profile
+- `name`
+- `description`
+- `website`
+- `category`
+- `sector_tags[]`
+- `stage`
+- `token_symbol`
+- `chain_focus[]`
+- `social_links` (dictionary by platform)
+- `key_claims[]`
+- `data_quality`
+  - `completeness_score`
+  - `missing_fields[]`
+  - `source_count`
+
+## 5) project_assessment
 - `strengths[]`
 - `risks[]`
 - `next_checks[]`
 - `red_flags[]`
 - `potential_catalysts[]`
 
-## 5) risk_register[]
+## 6) risk_register[]
 For each risk item:
 - `dimension`
 - `probability` (0..1)
@@ -38,13 +54,13 @@ For each risk item:
 - `owner`
 - `timeframe`
 
-## 6) investment_memo
+## 7) investment_memo
 - `summary`
 - `bull_case`
 - `bear_case`
 - `decision_statement`
 
-## 7) team_assessment
+## 8) team_assessment
 - `overall_score`
 - `confidence`
 - `founder_visibility_score`
@@ -56,7 +72,7 @@ For each risk item:
 - `concerns[]`
 - `open_questions[]`
 
-## 8) market_snapshot
+## 9) market_snapshot
 - `as_of_utc`
 - `regime`
 - `btc_price_usd`
@@ -72,7 +88,7 @@ For each risk item:
 - `fear_greed_label`
 - `notes[]`
 
-## 9) fundraising_context
+## 10) fundraising_context
 - `defillama_total_funding_rounds`
 - `defillama_total_funding_amount_usd`
 - `project_detected_raise_usd`
@@ -83,7 +99,7 @@ For each risk item:
 - `commentary`
 - `notes[]`
 
-## 10) dashboard
+## 11) dashboard
 - `generated_at_utc`
 - `kpis` (flat metric dictionary)
 - `top_alerts[]`
@@ -98,7 +114,7 @@ For each risk item:
   - `risk_severity`
   - `analysis`
 
-## 11) findings[]
+## 12) findings[]
 For each underwriting dimension:
 - `dimension`
 - `score`
@@ -114,5 +130,5 @@ For each underwriting dimension:
   - `count`
   - `polarity`
 
-## 12) sources[]
+## 13) sources[]
 - List of source URLs/files used in this run.

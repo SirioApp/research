@@ -127,6 +127,7 @@ Top-level analysis payload sections:
 - `score`
 - `executive_summary`
 - `recommendation`
+- `project_profile`
 - `project_assessment`
 - `risk_register`
 - `team_assessment`

@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import hmac
 import os
@@ -110,6 +110,32 @@ def _resolve_sources(payload: AnalyzeRequest) -> list[str]:
     )
 
 
+def _run_analysis(payload: AnalyzeRequest) -> AnalyzeResponse:
+    sources = _resolve_sources(payload)
+    agent = InvestmentResearchAgent(mode=payload.mode, model=payload.model)
+
+    try:
+        result = agent.run(sources)
+    except IngestionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Ingestion failed: {exc}",
+        ) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Analysis failed: {exc}",
+        ) from exc
+
+    return AnalyzeResponse(
+        request_id=str(uuid4()),
+        sources=sources,
+        mode=payload.mode,
+        model=payload.model,
+        result=result.to_dict(),
+    )
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(
@@ -125,13 +151,26 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    @app.get("/v1/health", response_model=HealthResponse, tags=["system"])
-    def health() -> HealthResponse:
+    @app.get("/", response_model=HealthResponse, tags=["system"])
+    def home() -> HealthResponse:
         return HealthResponse(
             status="ok",
             service="backed-research-agent-api",
             version=API_VERSION,
         )
+
+    @app.get("/v1/health", response_model=HealthResponse, tags=["system"])
+    def health() -> HealthResponse:
+        return home()
+
+    @app.post(
+        "/",
+        response_model=AnalyzeResponse,
+        dependencies=[Depends(authorize_request)],
+        tags=["analysis"],
+    )
+    def analyze_root(payload: AnalyzeRequest) -> AnalyzeResponse:
+        return _run_analysis(payload)
 
     @app.post(
         "/v1/analyze",
@@ -139,30 +178,8 @@ def create_app() -> FastAPI:
         dependencies=[Depends(authorize_request)],
         tags=["analysis"],
     )
-    def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
-        sources = _resolve_sources(payload)
-        agent = InvestmentResearchAgent(mode=payload.mode, model=payload.model)
-
-        try:
-            result = agent.run(sources)
-        except IngestionError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Ingestion failed: {exc}",
-            ) from exc
-        except Exception as exc:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Analysis failed: {exc}",
-            ) from exc
-
-        return AnalyzeResponse(
-            request_id=str(uuid4()),
-            sources=sources,
-            mode=payload.mode,
-            model=payload.model,
-            result=result.to_dict(),
-        )
+    def analyze_v1(payload: AnalyzeRequest) -> AnalyzeResponse:
+        return _run_analysis(payload)
 
     return app
 
@@ -175,3 +192,7 @@ def run() -> None:
 
     settings = get_settings()
     uvicorn.run(app, host=settings.host, port=settings.port, reload=False)
+
+
+if __name__ == "__main__":
+    run()

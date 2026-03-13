@@ -6,6 +6,7 @@ from .models import (
     InvestmentMemo,
     InvestmentScore,
     MarketSnapshot,
+    ProjectProfile,
     ResearchFinding,
     RiskItem,
     TeamAssessment,
@@ -22,4 +23,5 @@ __all__ = [
     "MarketSnapshot",
     "FundraisingContext",
     "DashboardData",
+    "ProjectProfile",
 ]
